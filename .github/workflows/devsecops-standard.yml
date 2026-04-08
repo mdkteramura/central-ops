@@ -62,4 +62,4 @@ jobs:
           region: ${{ inputs.region }}
           project_id: ${{ inputs.project_id }}
           entry_point: hello_world
-          gen2: true
+          environment: 'GEN_2'
