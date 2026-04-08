@@ -27,14 +27,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # MarketplaceのTrivyを利用して、コード内の脆弱性や誤ってPushされたシークレットをスキャン
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           ignore-unfixed: true
           format: 'table'
-          severity: 'CRITICAL,HIGH' # 重大な脆弱性のみ検出してブロック
+          severity: 'CRITICAL,HIGH'
 
   deploy:
     name: Auth and Deploy
@@ -49,13 +48,13 @@ jobs:
 
       - name: Google Auth
         id: auth
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@v2.1.8
         with:
           workload_identity_provider: ${{ inputs.workload_identity_provider }}
           service_account: ${{ inputs.service_account }}
 
       - name: Deploy to Cloud Functions
-        uses: google-github-actions/deploy-cloudfunctions@v2
+        uses: google-github-actions/deploy-cloudfunctions@v3
         with:
           name: ${{ inputs.function_name }}
           runtime: python311
