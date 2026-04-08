@@ -27,15 +27,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       
-      - name: Install Trivy (Binary Download)
+      - name: Install Trivy
         run: |
+          # 最も確実なバイナリインストール手順
           VERSION="0.50.1"
-          wget -q https://github.com/aquasecurity/trivy/releases/download/v${VERSION}/trivy_${VERSION}_Linux-64bit.deb
-          sudo dpkg -i trivy_${VERSION}_Linux-64bit.deb
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${VERSION}
           trivy --version
 
       - name: Run Trivy vulnerability scanner
         run: |
+          # 脆弱性が検知された場合、exit-code 1 を返してジョブを失敗させます
           trivy fs . \
             --exit-code 1 \
             --severity CRITICAL,HIGH \
