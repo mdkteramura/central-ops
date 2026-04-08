@@ -27,14 +27,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.28.0
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.2 # 2026年時点で最新安定版
         with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          cache: true
+
+      - name: Run Trivy vulnerability scanner (FS scan)
+        run: |
+          trivy fs . \
+            --exit-code 1 \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --format table
+        # 脆弱性が見つかると exit-code 1 で失敗し、次のデプロイをブロックします
 
   deploy:
     name: Auth and Deploy
