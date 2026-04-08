@@ -1,0 +1,65 @@
+name: DevSecOps Standard Workflow
+
+on:
+  workflow_call:
+    inputs:
+      project_id:
+        required: true
+        type: string
+      region:
+        required: true
+        type: string
+      function_name:
+        required: true
+        type: string
+      workload_identity_provider:
+        required: true
+        type: string
+      service_account:
+        required: true
+        type: string
+
+jobs:
+  security-scan:
+    name: Security Scan (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@18f251a8b2671da39329172bc503846618d00276 # v0.28.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+  deploy:
+    name: Auth and Deploy
+    needs: security-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@6fc35bc328905b76f1839e446059e74c836940d9 # v2.1.7
+        with:
+          workload_identity_provider: ${{ inputs.workload_identity_provider }}
+          service_account: ${{ inputs.service_account }}
+
+      - name: Deploy to Cloud Functions
+        uses: google-github-actions/deploy-cloudfunctions@3634e565985012e879a8385203f56e9f291e0a24 # v3.1.0
+        with:
+          name: ${{ inputs.function_name }}
+          runtime: python311
+          region: ${{ inputs.region }}
+          project_id: ${{ inputs.project_id }}
+          entry_point: hello_world
+          gen2: true
