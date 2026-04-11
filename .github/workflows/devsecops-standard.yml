@@ -21,19 +21,22 @@ on:
 
 jobs:
   security-scan:
-    name: Security Scan (Trivy)
+    name: Security Scan (Bandit)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
+          python-version: '3.11'
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit
+        run: bandit -r . -ll
 
   deploy:
     name: Auth and Deploy
