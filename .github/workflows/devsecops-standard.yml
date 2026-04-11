@@ -21,19 +21,19 @@ on:
 
 jobs:
   security-scan:
-    name: Security Scan (Bandit)
+    name: Security Scan (Trivy)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Bandit Scan
-        uses: shundor/bandit-action@v1
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
         with:
-          path: "."
-          level: high
-          confidence: high
-          exit_zero: true
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
 
   deploy:
     name: Auth and Deploy
